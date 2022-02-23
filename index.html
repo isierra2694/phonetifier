@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      .terms-list {
+        display: grid;
+        grid-template-columns: auto auto auto;
+      }
+
+      .term {
+
+      }
+    </style>
+  </head>
+  <body>
+    <div class="title-container">
+      <div class="title">
+        <h1>Phonetifier</h1>
+        <p style="font-style:italic;">identify phonemes easily<p>
+      </div>
+    </div>
+    <div class="input-container">
+      <div id="highlight-color">
+        <input type="color" id="vowel-highlight" name="vowel-highlight">
+        <label for="vowel-highlight">Vowel highlighter color</label>
+      </div>
+    </div>
+    <div class="terms-list-container">
+      <div id="terms-list-title">
+        <h2>Terms list</h2>
+      </div>
+      <!-- Terms drawer -->
+      <div class="terms-drawer">
+        <div class="term">
+          <input type="checkbox" id="term1" name="term" value="sh">
+          <label for="term1">test</label>
+        </div>
+      </div>
+      <div class="addition-container">
+        <!-- TODO: small text based button that adds a bullet point to terms-drawer-->
+      </div>
+    </div>
+    <div class="start-button">
+      <input type="button" value="Start" onclick="onStartButtonPressed()">
+    </div>
+    <script type="text/javascript">
+
+      // Called when we press the start button
+      function onStartButtonClicked() {
+        var selectedCheckboxes = getCheckedTerms();
+
+        google.script.run.startUnderlining(selectedCheckboxes);
+        google.script.run.highlightVowels();
+      }
+
+      // Gets all terms checked off in terms container
+      function getCheckedTerms() {
+        var checkboxes = document.getElementsByName("term");
+        var selected = [];
+        for (var i=0; i<checkboxes.length; i++) {
+          if (checkboxes[i].checked) {
+            selected.push(checkboxes[i].value);
+          }
+        }
+        return selected;
+      }
+
+    </script>
+  </body>
+</html>
