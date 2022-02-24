@@ -31,14 +31,14 @@
         <h2>Terms list</h2>
       </div>
       <!-- Terms drawer -->
-      <div class="terms-drawer">
+      <div id="terms-drawer" class="terms-drawer">
         <div class="term">
           <input type="checkbox" id="term1" name="term" value="sh">
           <label for="term1">test</label>
         </div>
       </div>
       <div class="addition-container">
-        <!-- TODO: small text based button that adds a bullet point to terms-drawer-->
+        <input type="button" onclick="showNewTermPopup()" value="Add a new term...">
       </div>
     </div>
     <div class="start-button">
@@ -64,6 +64,14 @@
           }
         }
         return selected;
+      }
+
+      function addNewTermElement() {
+        var termNode = document.createElement("div");
+        termNode.className = "term";
+        document.getElementById("")
+        const termInputNode = document.createElement("input");
+
       }
 
     </script>
