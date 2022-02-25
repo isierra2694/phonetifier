@@ -1,19 +1,28 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
   <head>
     <base target="_top">
     <style>
+
       .terms-list {
         display: grid;
         grid-template-columns: auto auto auto;
       }
 
-      .term {
-
+      .term-text-input {
+        margin: 8px 0;
+        padding: 12px 10px;
+        border: none;
+        -webkit-transition: 0.5s;
       }
+
+      .term-text-input:focus {
+        border: 1px solid #555;
+      }
+
     </style>
   </head>
-  <body>
+  <body onload="createTermsListFromSavedData()">
     <div class="title-container">
       <div class="title">
         <h1>Phonetifier</h1>
@@ -30,21 +39,24 @@
       <div id="terms-list-title">
         <h2>Terms list</h2>
       </div>
-      <!-- Terms drawer -->
       <div id="terms-drawer" class="terms-drawer">
         <div class="term">
           <input type="checkbox" id="term1" name="term" value="sh">
-          <label for="term1">test</label>
+          <label for="term1">
+            <input type="text" class="term-text-input" id="term1text" value="New term" onChange="updateTermsList(this.value, this.id)">
+          </label>
         </div>
       </div>
       <div class="addition-container">
-        <input type="button" onclick="showNewTermPopup()" value="Add a new term...">
+        <input type="button" onclick="addNewTermElement()" value="Add a new term...">
       </div>
     </div>
     <div class="start-button">
       <input type="button" value="Start" onclick="onStartButtonPressed()">
     </div>
     <script type="text/javascript">
+
+      let termsList = new Object();
 
       // Called when we press the start button
       function onStartButtonClicked() {
@@ -66,12 +78,60 @@
         return selected;
       }
 
-      function addNewTermElement() {
+      let newTermIndex = 2;
+
+      // Used by both the document and deserializing data
+      function addNewTermElement(term = null, id = null) {
+        // Create master term element
         var termNode = document.createElement("div");
         termNode.className = "term";
-        document.getElementById("")
-        const termInputNode = document.createElement("input");
 
+        // Create input element and append to parent
+        var termInputNode = document.createElement("input");
+        termInputNode.type = "checkbox";
+        termInputNode.id = "term" + newTermIndex;
+        termNode.appendChild(termInputNode);
+
+        // Create input label and append to parent
+        var termInputLabelNode = document.createElement("label");
+        termInputLabelNode.for = "term" + newTermIndex;
+        termNode.appendChild(termInputLabelNode);
+
+        // Create text input node and append to parent
+        var termInputTextNode = document.createElement("input");
+        termInputTextNode.type = "text";
+        termInputTextNode.className = "term-text-input";
+
+        // Check if optional term parameter exists
+        if (term && id) {
+          termInputTextNode.id = id;
+          termInputTextNode.value = term;
+        }
+        // If false, make an empty term
+        else {
+          termInputTextNode.id = "term" + newTermIndex;
+        }
+
+        termInputTextNode.setAttribute("onChange", "updateTermsList(this.value, this.id)")
+        termInputLabelNode.appendChild(termInputTextNode);
+
+        // Append master to document
+        document.getElementById("terms-drawer").appendChild(termNode);
+        newTermIndex++;
+      }
+
+      function updateTermsList(newTerm, termId) {
+        termsList[termId] = newTerm;
+        google.script.run.onTermsListChanged(termsList);
+      }
+
+      function createTermsListFromSavedData() {
+        termsList = google.script.run.getSavedTermsList();
+        if (termsList) {
+          for (const [key, value] of Object.entries(termsList)) {
+            addNewTermElement(key, value);
+          }
+        }
       }
 
     </script>
