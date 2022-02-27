@@ -5,6 +5,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato&family=Roboto&display=swap" rel="stylesheet">
     <style>
 
       .terms-list {
@@ -23,17 +24,34 @@
         border: 1px solid #555;
       }
 
-      .title-text {
-        font-family:
+      .navbar {
+        list-style-type: none;
+      }
+
+      .navbaritem {
+        display: inline;
+      }
+
+      p {
+        font-family: "Roboto";
       }
 
     </style>
   </head>
   <body onload="createTermsListFromSavedData()">
-    <div class="title-container">
-      <div class="title">
-        <h1 class="title-text">Phonetifier</h1>
-        <p style="font-style:italic;">identify phonemes easily<p>
+    <div class="navbar-container">
+      <div>
+        <ul class="navbar">
+          <li class="navbaritem">
+            <p>Home</p>
+          </li>
+          <li class="navbaritem">
+            <p>Terms</p>
+          </li>
+          <li class="navbaritem">
+            <p>Settings</p>
+          </li>
+        </ul>
       </div>
     </div>
     <div class="input-container">
