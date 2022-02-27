@@ -59,10 +59,11 @@ function highlightVowels() {
 }
 
 function onTermsListChanged(_termsList) {
-  var userProperties = PropertiesService.getUserProperties();
-  userProperties.setProperties(_termsList);
+  var scriptProperties = PropertiesService.getScriptProperties();
+  scriptProperties.setProperties(_termsList);
+  Logger.log("Saved " + scriptProperties);
 }
 
 function getSavedTermsList() {
-  return PropertiesService.getUserProperties();
+  return PropertiesService.getScriptProperties();
 }

@@ -2,6 +2,9 @@
 <html>
   <head>
     <base target="_top">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
     <style>
 
       .terms-list {
@@ -20,12 +23,16 @@
         border: 1px solid #555;
       }
 
+      .title-text {
+        font-family:
+      }
+
     </style>
   </head>
   <body onload="createTermsListFromSavedData()">
     <div class="title-container">
       <div class="title">
-        <h1>Phonetifier</h1>
+        <h1 class="title-text">Phonetifier</h1>
         <p style="font-style:italic;">identify phonemes easily<p>
       </div>
     </div>
@@ -57,6 +64,7 @@
     <script type="text/javascript">
 
       let termsList = new Object();
+      let newTermIndex = 2;
 
       // Called when we press the start button
       function onStartButtonClicked() {
@@ -77,8 +85,6 @@
         }
         return selected;
       }
-
-      let newTermIndex = 2;
 
       // Used by both the document and deserializing data
       function addNewTermElement(term = null, id = null) {
@@ -126,11 +132,16 @@
       }
 
       function createTermsListFromSavedData() {
-        termsList = google.script.run.getSavedTermsList();
-        if (termsList) {
+        console.log("run deserialize");
+        if (google.script.run.getSavedTermsList()) {
+          termsList = google.script.run.getSavedTermsList();
+          console.log("Deserialized " + Object.keys(termsList).length + " terms.")
           for (const [key, value] of Object.entries(termsList)) {
             addNewTermElement(key, value);
           }
+        }
+        else {
+          console.log("no existing data found, proceeding");
         }
       }
 
