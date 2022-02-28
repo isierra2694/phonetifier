@@ -11,6 +11,20 @@
         font-family: "Roboto";
       }
 
+      .settings-button-container {
+        float: right;
+      }
+
+      .settings-button {
+        border: none;
+        background-color: white;
+      }
+
+      .settings-icon {
+        width: 32px;
+        height: 32px;
+      }
+
       .title-container {
         margin: 0;
         position: absolute;
@@ -41,9 +55,23 @@
         background-color: #73a862;
       }
 
+      .edit-button {
+        border: none;
+        background-color: white;
+        color: #4f7942;
+        font-style: italic;
+      }
+
     </style>
   </head>
-  <body onload="createTermsListFromSavedData()">
+  <body>
+    <div class="header">
+      <div class="settings-button-container">
+        <button class="settings-button" onclick="showSettingsDialog()">
+          <img src="https://static.thenounproject.com/png/333752-200.png" class="settings-icon">
+        </button>
+      </div>
+    </div>
     <div class="title-container">
       <div class="title-text-container">
          <h1 class="title-text">Phonetifier</h1>
@@ -55,13 +83,16 @@
       </div>
       <br>
       <div class="edit-button-container">
-        <button class="edit-button" onclick="showEditTermsDialog()">Edit terms</button>
+        <button class="edit-button" onclick="showEditTermsDialog()">Edit terms...</button>
       </div>
     </div>
 
     <script type="text/javascript">
 
-
+      function showSettingsDialog() {
+        console.log("request edit settings");
+        google.script.run.showSettingsDialog();
+      }
 
       function showEditTermsDialog() {
         console.log("request edit terms");

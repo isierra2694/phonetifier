@@ -16,6 +16,22 @@ function showSidebar() {
   DocumentApp.getUi().showSidebar(html);
 }
 
+function showTermsDialog() {
+  var html = HtmlService.createHtmlOutputFromFile("termsdialog")
+    .setWidth(300)
+    .setHeight(700);
+  DocumentApp.getUi()
+    .showModalDialog(html, "Edit terms");
+}
+
+function showSettingsDialog() {
+  var html = HtmlService.createHtmlOutputFromFile("settingsdialog")
+    .setWidth(300)
+    .setHeight(700);
+  DocumentApp.getUi()
+    .showModalDialog(html, "Settings")
+}
+
 // Called when we press the start button on HTML
 function startUnderlining(terms) {
   for(var i=0; i<terms.length; i++) {
@@ -58,12 +74,18 @@ function highlightVowels() {
   }
 }
 
-function onTermsListChanged(_termsList) {
+function onTermsListChanged(termsList) {
   var scriptProperties = PropertiesService.getScriptProperties();
-  scriptProperties.setProperties(_termsList);
-  Logger.log("Saved " + scriptProperties);
+  scriptProperties.setProperties(termsList);
+  Logger.log("Saved termslist");
+  getSavedTermsList();
 }
 
 function getSavedTermsList() {
-  return PropertiesService.getScriptProperties();
+  var properties = PropertiesService.getScriptProperties();
+  var data = properties.getProperties();
+  for (var key in data) {
+    Logger.log('Key: %s, Value: %s', key, data[key]);
+  }
+  return data;
 }
