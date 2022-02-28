@@ -2,8 +2,197 @@
 <html>
   <head>
     <base target="_top">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato&family=Roboto&display=swap" rel="stylesheet">
+    <style>
+
+      html {
+        font-family: "Roboto";
+      }
+
+      .term {
+        display: block;
+        position: relative;
+        cursor: pointer;
+        padding-left: 35px;
+        margin-bottom: 15px;
+      }
+
+      .term-checkbox {
+        display: inline-block;
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+      }
+
+      .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 20px;
+        width: 20px;
+        border-radius: 2px;
+        background-color: #eee;
+      }
+
+      .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+      }
+
+      .term input:checked ~ .checkmark:after {
+        display: block;
+      }
+
+      .term .checkmark:after {
+        position: absolute;
+        content: "";
+        top: 50%;
+        left: 3px;
+        transform: scaleX(-1) rotate(135deg);
+        height: 10px;
+        width: 5px;
+        border-top: 3px solid #5cb85c;
+        border-right: 3px solid #5cb85c;
+        transform-origin: left top;
+        animation: checkmark 0.8s ease;
+      }
+
+      @keyframes checkmark {
+        0%{
+          height: 0;
+          width: 0;
+          opacity: 1;
+        }
+        20%{
+          height: 0;
+          width: 5px;
+          opacity: 1;
+        }
+        40%{
+          height: 10px;
+         width: 5px;
+         opacity: 1;
+        }
+       100%{
+         height: 10px;
+         width: 5px;
+          opacity: 1;
+        }
+      }
+
+      .term-text-input {
+        border-style: hidden;
+      }
+
+      .term-text-input:focus {
+        outline: none;
+      }
+
+      .term-text-input-container {
+        display: inline-block;
+        margin: 0;
+      }
+
+      .term-text-input-container:after {
+        display: block;
+        content: "";
+        border-bottom: solid 1px #808080;
+        transform: scaleX(0);
+        transition: transform 200ms ease-in-out;
+      }
+
+      .term-text-input-container:hover:after {
+        transform: scaleX(1);
+      }
+
+    </style>
   </head>
   <body>
-    <p>Text</p>
+    <div class="terms-list-container">
+      <div id="terms-drawer" class="terms-drawer">
+        <label class="term">
+          <input class="term-checkbox" type="checkbox">
+          <div class="term-text-input-container">
+            <input class="term-text-input" type="text">
+          </div>
+          <span class="checkmark"></span>
+        </label>
+      </div>
+
+      <div class="addition-container">
+        <input type="button" onclick="addNewTermElement()" value="Add a new term...">
+      </div>
+    </div>
+    <script>
+
+      let termsList = new Object();
+      let newTermIndex = 2;
+
+      // Gets all terms checked off in terms container
+      function getCheckedTerms() {
+        var checkboxes = document.getElementsByName("term");
+        var selected = [];
+        for (var i=0; i<checkboxes.length; i++) {
+          if (checkboxes[i].checked) {
+            selected.push(checkboxes[i].value);
+          }
+        }
+        return selected;
+      }
+
+      // Used by both the document and deserializing data
+      function addNewTermElement(term = null, id = null) {
+        // Create master term element
+        var termNode = document.createElement("label");
+        termNode.className = "term";
+
+        var termCheckboxInputNode = document.createElement("input");
+        termCheckboxInputNode.className = "term-checkbox";
+        termCheckboxInputNode.type = "checkbox";
+        termNode.appendChild(termCheckboxInputNode);
+
+        var termTextInputContainerNode = document.createElement("div");
+        termTextInputContainerNode.className = "term-text-input-container";
+        termNode.appendChild(termTextInputContainerNode);
+
+        var termTextInputNode = document.createElement("input");
+        termTextInputNode.className = "term-text-input";
+        termTextInputNode.type = "text";
+        termTextInputContainerNode.appendChild(termTextInputNode);
+
+        var checkmarkNode = document.createElement("span");
+        checkmarkNode.className = "checkmark";
+        termNode.appendChild(checkmarkNode);
+
+        // Append master to document
+        document.getElementById("terms-drawer").appendChild(termNode);
+        newTermIndex++;
+      }
+
+      function updateTermsList(newTerm, termId) {
+        termsList[termId] = newTerm;
+        google.script.run.onTermsListChanged(termsList);
+      }
+
+      function createTermsListFromSavedData() {
+        console.log("run deserialize");
+        if (google.script.run.getSavedTermsList()) {
+          termsList = google.script.run.getSavedTermsList();
+          console.log("Deserialized " + Object.keys(termsList).length + " terms.")
+          for (const [key, value] of Object.entries(termsList)) {
+            addNewTermElement(key, value);
+          }
+        }
+        else {
+          console.log("no existing data found, proceeding");
+        }
+      }
+
+    </script>
   </body>
 </html>

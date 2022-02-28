@@ -7,21 +7,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato&family=Roboto&display=swap" rel="stylesheet">
     <style>
 
+      html {
+        font-family: "Roboto";
+      }
+
       .title-container {
         margin: 0;
         position: absolute;
-        top: 50%;
+        top: 45%;
         left: 50%;
-        -ms-transform: translate(-50%, -50%);
-        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -45%);
+        transform: translate(-50%, -45%);
       }
 
-      .title-text-container, .start-button-container {
+      .title-text-container, .start-button-container, .edit-button-container {
         text-align: center;
-      }
-
-      .title-text {
-        font-family: "Roboto";
       }
 
       .start-button {
@@ -32,7 +32,6 @@
         text-align: center;
         display: inline-block;
         font-size: 16px;
-        font-family: "Roboto";
         font-weight: bold;
         border-radius: 5px;
         transition: background-color 1s;
@@ -54,27 +53,20 @@
       <div class="start-button-container">
         <button class="start-button">Start</button>
       </div>
-    </div>
-    <div class="terms-list-container">
-      <div id="terms-list-title">
-        <h2>Terms list</h2>
-      </div>
-      <div id="terms-drawer" class="terms-drawer">
-        <div class="term">
-          <input type="checkbox" id="term1" name="term" value="sh">
-          <label for="term1">
-            <input type="text" class="term-text-input" id="term1text" value="New term" onChange="updateTermsList(this.value, this.id)">
-          </label>
-        </div>
-      </div>
-      <div class="addition-container">
-        <input type="button" onclick="addNewTermElement()" value="Add a new term...">
+      <br>
+      <div class="edit-button-container">
+        <button class="edit-button" onclick="showEditTermsDialog()">Edit terms</button>
       </div>
     </div>
+
     <script type="text/javascript">
 
-      let termsList = new Object();
-      let newTermIndex = 2;
+
+
+      function showEditTermsDialog() {
+        console.log("request edit terms");
+        google.script.run.showTermsDialog();
+      }
 
       // Called when we press the start button
       function onStartButtonClicked() {
@@ -82,77 +74,6 @@
 
         google.script.run.startUnderlining(selectedCheckboxes);
         google.script.run.highlightVowels();
-      }
-
-      // Gets all terms checked off in terms container
-      function getCheckedTerms() {
-        var checkboxes = document.getElementsByName("term");
-        var selected = [];
-        for (var i=0; i<checkboxes.length; i++) {
-          if (checkboxes[i].checked) {
-            selected.push(checkboxes[i].value);
-          }
-        }
-        return selected;
-      }
-
-      // Used by both the document and deserializing data
-      function addNewTermElement(term = null, id = null) {
-        // Create master term element
-        var termNode = document.createElement("div");
-        termNode.className = "term";
-
-        // Create input element and append to parent
-        var termInputNode = document.createElement("input");
-        termInputNode.type = "checkbox";
-        termInputNode.id = "term" + newTermIndex;
-        termNode.appendChild(termInputNode);
-
-        // Create input label and append to parent
-        var termInputLabelNode = document.createElement("label");
-        termInputLabelNode.for = "term" + newTermIndex;
-        termNode.appendChild(termInputLabelNode);
-
-        // Create text input node and append to parent
-        var termInputTextNode = document.createElement("input");
-        termInputTextNode.type = "text";
-        termInputTextNode.className = "term-text-input";
-
-        // Check if optional term parameter exists
-        if (term && id) {
-          termInputTextNode.id = id;
-          termInputTextNode.value = term;
-        }
-        // If false, make an empty term
-        else {
-          termInputTextNode.id = "term" + newTermIndex;
-        }
-
-        termInputTextNode.setAttribute("onChange", "updateTermsList(this.value, this.id)")
-        termInputLabelNode.appendChild(termInputTextNode);
-
-        // Append master to document
-        document.getElementById("terms-drawer").appendChild(termNode);
-        newTermIndex++;
-      }
-
-      function updateTermsList(newTerm, termId) {
-        termsList[termId] = newTerm;
-        google.script.run.onTermsListChanged(termsList);
-      }
-
-      function createTermsListFromSavedData() {
-        console.log("run deserialize");
-        if (google.script.run.getSavedTermsList()) {
-          termsList = google.script.run.getSavedTermsList();
-          console.log("Deserialized " + Object.keys(termsList).length + " terms.")
-          for (const [key, value] of Object.entries(termsList)) {
-            addNewTermElement(key, value);
-          }
-        }
-        else {
-          console.log("no existing data found, proceeding");
-        }
       }
 
     </script>
