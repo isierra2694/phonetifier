@@ -17,12 +17,25 @@
 
       .settings-button {
         border: none;
+        cursor: pointer;
         background-color: white;
       }
 
       .settings-icon {
-        width: 32px;
-        height: 32px;
+        width: 24px;
+        height: 24px;
+      }
+
+      @keyframes spin {
+        from { transform: rotate(0deg) }
+        to { transform: rotate(360deg) }
+      }
+
+      .settings-button:focus .settings-icon {
+        animation-name: spin;
+        animation-duration: 1s;
+        animation-iteration-count: 1;
+        animation-timing-function: ease-in-out;
       }
 
       .title-container {
@@ -43,6 +56,7 @@
         border: none;
         color: white;
         padding: 15px 32px;
+        cursor: pointer;
         text-align: center;
         display: inline-block;
         font-size: 16px;
@@ -58,6 +72,7 @@
       .edit-button {
         border: none;
         background-color: white;
+        cursor: pointer;
         color: #4f7942;
         font-style: italic;
       }
@@ -68,7 +83,7 @@
     <div class="header">
       <div class="settings-button-container">
         <button class="settings-button" onclick="showSettingsDialog()">
-          <img src="https://static.thenounproject.com/png/333752-200.png" class="settings-icon">
+          <img class="settings-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Windows_Settings_app_icon.png/600px-Windows_Settings_app_icon.png" class="settings-icon">
         </button>
       </div>
     </div>
@@ -83,7 +98,7 @@
       </div>
       <br>
       <div class="edit-button-container">
-        <button class="edit-button" onclick="showEditTermsDialog()">Edit terms...</button>
+        <button class="edit-button" onclick="showEditTermsDialog()">edit terms...</button>
       </div>
     </div>
 
@@ -101,8 +116,6 @@
 
       // Called when we press the start button
       function onStartButtonClicked() {
-        var selectedCheckboxes = getCheckedTerms();
-
         google.script.run.startUnderlining(selectedCheckboxes);
         google.script.run.highlightVowels();
       }

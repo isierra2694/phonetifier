@@ -27,15 +27,16 @@ function showTermsDialog() {
 function showSettingsDialog() {
   var html = HtmlService.createHtmlOutputFromFile("settingsdialog")
     .setWidth(300)
-    .setHeight(700);
+    .setHeight(300);
   DocumentApp.getUi()
     .showModalDialog(html, "Settings")
 }
 
 // Called when we press the start button on HTML
-function startUnderlining(terms) {
-  for(var i=0; i<terms.length; i++) {
-    underlineTerm(terms[i]);
+function startUnderlining() {
+  termsList = getSavedTermsList();
+  for (const [key, value] of Object.entries(termsList)) {
+    underlineTerm(value);
   }
 }
 
@@ -84,8 +85,11 @@ function onTermsListChanged(termsList) {
 function getSavedTermsList() {
   var properties = PropertiesService.getScriptProperties();
   var data = properties.getProperties();
-  for (var key in data) {
-    Logger.log('Key: %s, Value: %s', key, data[key]);
-  }
   return data;
+}
+
+function clearTermsList() {
+  var properties = PropertiesService.getScriptProperties();
+  properties.deleteAllProperties();
+  Logger.log("Cleared property store");
 }
