@@ -34,9 +34,10 @@ function showSettingsDialog() {
 
 // Called when we press the start button on HTML
 function startUnderlining() {
-  termsList = getSavedTermsList();
+  var termsList = getSavedTermsList();
   for (const [key, value] of Object.entries(termsList)) {
-    underlineTerm(value);
+    // Value is an array [activeState, term], we need value[1] for term
+    underlineTerm(value[1]);
   }
 }
 

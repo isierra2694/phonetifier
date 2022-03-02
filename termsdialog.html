@@ -123,10 +123,10 @@
   <body onload="getSavedTermsList()">
     <div class="terms-list-container">
       <div id="terms-drawer" class="terms-drawer">
-        <label class="term">
-          <input class="term-checkbox" type="checkbox" name="term1" onchange="changeCheckboxStatus(this.name, this.checked, this.value)">
+        <label class="term" id="term1">
+          <input class="term-checkbox" id="term1checkbox" type="checkbox" onchange="onChangeCheckboxStatus('term1', this.checked, this.value)">
           <div class="term-text-input-container">
-            <input class="term-text-input" id="term1" type="text" name="term-text-input" onchange="updateTermCheckbox(this.id, this.value)">
+            <input class="term-text-input" type="text" name="term-text-input" onchange="onEditTermTextInput('term1', this.value)">
           </div>
           <span class="checkmark"></span>
         </label>
@@ -137,8 +137,8 @@
     </div>
     <script>
 
-      let termsList = new Object();
-      let newTermIndex = 0;
+      let newTermIndex = 2;
+      let clientTermsList = new Object();
 
       // Gets all terms checked off in terms container
       function getCheckedTerms() {
@@ -157,10 +157,12 @@
         // Create master term element
         var termNode = document.createElement("label");
         termNode.className = "term";
+        termNode.id = id;
 
         // Create checkbox input element
         var termCheckboxInputNode = document.createElement("input");
         termCheckboxInputNode.className = "term-checkbox";
+        termCheckboxInputNode.id = "term" + newTermIndex + "checkbox";
         termCheckboxInputNode.type = "checkbox";
         if (term != null) {
           termCheckboxInputNode.setAttribute("value", term);
@@ -168,7 +170,7 @@
         if (state != null) {
           termCheckboxInputNode.checked = state;
         }
-        termCheckboxInputNode.setAttribute("onchange", "changeCheckboxStatus(this.name, this.checked, this.value)");
+        termCheckboxInputNode.setAttribute("onchange", "onChangeCheckboxStatus('term" + newTermIndex + "', this.checked, this.value)");
         termNode.appendChild(termCheckboxInputNode);
 
         // Create text input container element
@@ -179,16 +181,9 @@
         // Create text input element
         var termTextInputNode = document.createElement("input");
         termTextInputNode.className = "term-text-input";
-        // Used by loading function
-        if (id != null) {
-          termTextInputNode.id = id
-        }
-        else {
-          termTextInputNode.id = "term" + newTermIndex;
-        }
         termTextInputNode.type = "text";
         termTextInputNode.setAttribute("name", "term-text-input");
-        termTextInputNode.setAttribute("onchange", "updateTermCheckbox(this.id, this.value)")
+        termTextInputNode.setAttribute("onchange", "onEditTermTextInput('term" + newTermIndex + "', this.value)")
         // Again, used by loading function
         if (term != null) {
           termTextInputNode.value = term;
@@ -208,45 +203,47 @@
         newTermIndex++;
       }
 
-      // Update term checkbox node value to term text input node value
-      function updateTermCheckbox(termId, newValue) {
-        document.getElementsByName("termId")
-          .setAttribute("value", newValue);
-        updateTermsList(termId, newValue);
-        console.log("changed " + termId + " checkbox value to " + newValue);
+      function onEditTermTextInput(termId, termValue) {
+        // Get checkbox state
+        var checkbox = document.getElementById(termId + "checkbox");
+        checkbox.value = termValue;
+
+        // Create new value for client terms list dictionary using checkbox checked status and string value [checked, value]
+        var newValue = [checkbox.checked, checkbox.value]
+
+        // Set term in client terms list dictionary with key termId and value newValue
+        clientTermsList[termId] = newValue;
+
+        // Save terms list
+        saveClientList();
       }
 
-      // Update checkbox status with server when changed
-      function changeCheckboxStatus(termId, newState, newValue) {
-        updateTermsList(termId, newValue, newState);
+      function onChangeCheckboxStatus(termId, newState) {
+        var currentValue = clientTermsList[termId];
+        currentValue[1] = newState;
+
+        var newValue = currentValue;
+        clientTermsList[termId] = newValue;
+
+        // Save terms list
+        saveClientList();
       }
 
-      // Update terms list on server side
-      function updateTermsList(termId, newTerm, newState = null) {
-        var temp = termsList[termId];
-        var newValue = [];
-        // Check if there's already an existing state for the term
-        if (temp != null) {
-          newValue = [temp[0], newTerm];
-        }
-        else {
-          newValue = [newState, newTerm];
-        }
-        termsList[termId] = newValue;
-        google.script.run.onTermsListChanged(termsList);
-        console.log(termsList[termId]);
+      function saveClientList() {
+        console.log("Save terms list request (client list currently contains " + Object.keys(clientTermsList).length + " terms)")
+        google.script.run.onTermsListChanged(clientTermsList);
       }
 
       function createTermsListFromSavedData(termsList) {
-        console.log("data found, run deserialize");
-        console.log("deserialized " + Object.keys(termsList).length + " terms")
+        clientTermsList = termsList;
         for (const [key, value] of Object.entries(termsList)) {
           addNewTermElement(key, value[1], value[0]);
+          console.log(key + value[1] + value[0]);
         }
       }
 
       function getSavedTermsList() {
-        console.log("get saved terms");
+        console.log("Get saved terms");
         google.script.run.withSuccessHandler(createTermsListFromSavedData).getSavedTermsList();
       }
 
