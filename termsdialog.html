@@ -11,6 +11,10 @@
         font-family: "Roboto";
       }
 
+      ul {
+        list-style-type: none;
+      }
+
       .term {
         display: block;
         position: relative;
@@ -110,6 +114,24 @@
         transform: scaleX(1);
       }
 
+      .removal-button {
+        border: none;
+        background-color: white;
+        cursor: pointer;
+      }
+
+      @keyframes spin {
+        from { transform: rotate(0deg) }
+        to { transform: rotate(360deg) }
+      }
+
+      .removal-button:hover {
+        animation-name: spin;
+        animation-duration: 1s;
+        animation-iteration-count: 1;
+        animation-timing-function: ease-in-out;
+      }
+
       .addition-button {
         border: none;
         background-color: white;
@@ -123,13 +145,20 @@
   <body onload="getSavedTermsList()">
     <div class="terms-list-container">
       <div id="terms-drawer" class="terms-drawer">
-        <label class="term" id="term1">
-          <input class="term-checkbox" id="term1checkbox" type="checkbox" onchange="onChangeCheckboxStatus('term1', this.checked, this.value)">
-          <div class="term-text-input-container">
-            <input class="term-text-input" type="text" name="term-text-input" onchange="onEditTermTextInput('term1', this.value)">
-          </div>
-          <span class="checkmark"></span>
-        </label>
+        <ul id="terms-list">
+          <li class="term" id="term1">
+            <label>
+              <input class="term-checkbox" id="term1checkbox" type="checkbox" onchange="onChangeCheckboxStatus('term1', this.checked, this.value)">
+              <div class="term-text-input-container">
+               <input class="term-text-input" type="text" name="term-text-input" onchange="onEditTermTextInput('term1', this.value)">
+              </div>
+              <span class="checkmark"></span>
+              <button class="removal-button" onclick="removeTermFromList('term1')">
+               <span>&times;</span>
+              </button>
+            </label>
+          </li>
+        </ul>
       </div>
       <div class="addition-container">
         <input class="addition-button" type="button" onclick="addNewTermElement()" value="add a new term...">
@@ -137,7 +166,7 @@
     </div>
     <script>
 
-      let newTermIndex = 2;
+      let newTermIndex;
       let clientTermsList = new Object();
 
       // Gets all terms checked off in terms container
@@ -154,10 +183,18 @@
 
       // Used by both the document and deserializing data
       function addNewTermElement(id = null, term = null, state = null) {
+        var liNode = document.createElement("li");
+        liNode.className = "term";
+        if (id != null) {
+          liNode.id = id;
+        }
+        else {
+          liNode.id = "term" + newTermIndex;
+        }
+
         // Create master term element
         var termNode = document.createElement("label");
-        termNode.className = "term";
-        termNode.id = id;
+        liNode.appendChild(termNode);
 
         // Create checkbox input element
         var termCheckboxInputNode = document.createElement("input");
@@ -183,13 +220,13 @@
         termTextInputNode.className = "term-text-input";
         termTextInputNode.type = "text";
         termTextInputNode.setAttribute("name", "term-text-input");
-        termTextInputNode.setAttribute("onchange", "onEditTermTextInput('term" + newTermIndex + "', this.value)")
+        termTextInputNode.setAttribute("onchange", "onEditTermTextInput('term" + newTermIndex + "', this.value)");
         // Again, used by loading function
         if (term != null) {
           termTextInputNode.value = term;
         }
         else {
-          termTextInputNode.value = "New term"
+          termTextInputNode.value = "New term";
         }
         termTextInputContainerNode.appendChild(termTextInputNode);
 
@@ -198,9 +235,26 @@
         checkmarkNode.className = "checkmark";
         termNode.appendChild(checkmarkNode);
 
+        // Create removal button
+        var removalButtonNode = document.createElement("button");
+        removalButtonNode.className = "removal-button";
+        removalButtonNode.setAttribute("onclick", "removeTermFromList('term" + newTermIndex + "')")
+        var removalSpanNode = document.createElement("span");
+        removalSpanNode.innerHTML = "&times;";
+        removalButtonNode.appendChild(removalSpanNode);
+        termNode.appendChild(removalButtonNode);
+
         // Append master to document
-        document.getElementById("terms-drawer").appendChild(termNode);
+        document.getElementById("terms-list").appendChild(liNode);
         newTermIndex++;
+      }
+
+      function removeTermFromList(termId) {
+        document.getElementById(termId).remove();
+        if (clientTermsList.hasOwnProperty(termId)) {
+          delete clientTermsList[termId];
+          saveClientList();
+        }
       }
 
       function onEditTermTextInput(termId, termValue) {
@@ -209,7 +263,7 @@
         checkbox.value = termValue;
 
         // Create new value for client terms list dictionary using checkbox checked status and string value [checked, value]
-        var newValue = [checkbox.checked, checkbox.value]
+        var newValue = [checkbox.checked, checkbox.value];
 
         // Set term in client terms list dictionary with key termId and value newValue
         clientTermsList[termId] = newValue;
@@ -220,7 +274,7 @@
 
       function onChangeCheckboxStatus(termId, newState) {
         var currentValue = clientTermsList[termId];
-        currentValue[1] = newState;
+        currentValue[0] = newState;
 
         var newValue = currentValue;
         clientTermsList[termId] = newValue;
@@ -230,16 +284,21 @@
       }
 
       function saveClientList() {
-        console.log("Save terms list request (client list currently contains " + Object.keys(clientTermsList).length + " terms)")
+        console.log("Save terms list request (client list currently contains " + Object.keys(clientTermsList).length + " terms)");
+        newTermIndex = Object.keys(clientTermsList).length + 1;
         google.script.run.onTermsListChanged(clientTermsList);
       }
 
       function createTermsListFromSavedData(termsList) {
         clientTermsList = termsList;
-        for (const [key, value] of Object.entries(termsList)) {
-          addNewTermElement(key, value[1], value[0]);
-          console.log(key + value[1] + value[0]);
+        newTermIndex = Object.keys(clientTermsList).length + 1;
+        for (var key in clientTermsList) {
+          var value = clientTermsList[key];
+          var enabled = value[0];
+          var term = value[1];
+          addNewTermElement(key, term, enabled);
         }
+        console.log("Deserialized terms, proceeding")
       }
 
       function getSavedTermsList() {

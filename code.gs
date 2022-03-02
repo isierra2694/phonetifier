@@ -77,16 +77,30 @@ function highlightVowels() {
 }
 
 function onTermsListChanged(termsList) {
+  var newDictionary = {};
+  for (var key in termsList) {
+    var value = termsList[key];
+    var jvalue = JSON.stringify(value);
+    newDictionary[key] = jvalue;
+  }
+
   var scriptProperties = PropertiesService.getScriptProperties();
-  scriptProperties.setProperties(termsList);
+  scriptProperties.setProperties(newDictionary);
   Logger.log("Saved termslist");
-  getSavedTermsList();
 }
 
 function getSavedTermsList() {
+  var actual = {};
   var properties = PropertiesService.getScriptProperties();
   var data = properties.getProperties();
-  return data;
+
+  for (var key in data) {
+    var value = data[key];
+    var pvalue = JSON.parse(value);
+    actual[key] = pvalue;
+  }
+
+  return actual;
 }
 
 function clearTermsList() {
