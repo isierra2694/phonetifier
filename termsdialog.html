@@ -146,18 +146,7 @@
     <div class="terms-list-container">
       <div id="terms-drawer" class="terms-drawer">
         <ul id="terms-list">
-          <li class="term" id="term1">
-            <label>
-              <input class="term-checkbox" id="term1checkbox" type="checkbox" onchange="onChangeCheckboxStatus('term1', this.checked, this.value)">
-              <div class="term-text-input-container">
-               <input class="term-text-input" type="text" name="term-text-input" onchange="onEditTermTextInput('term1', this.value)">
-              </div>
-              <span class="checkmark"></span>
-              <button class="removal-button" onclick="removeTermFromList('term1')">
-               <span>&times;</span>
-              </button>
-            </label>
-          </li>
+
         </ul>
       </div>
       <div class="addition-container">
@@ -166,7 +155,7 @@
     </div>
     <script>
 
-      let newTermIndex;
+      let newTermIndex = 1;
       let clientTermsList = new Object();
 
       // Gets all terms checked off in terms container
@@ -182,15 +171,16 @@
       }
 
       // Used by both the document and deserializing data
-      function addNewTermElement(id = null, term = null, state = null) {
+      // When constructing a list from existing data, we create new ids as it's more simple
+      function addNewTermElement(term = null, state = null) {
+        // New id counted by how many terms we've created/exist
+        var newId = newTermIndex;
+        var existingState;
+        var existingValue;
+
         var liNode = document.createElement("li");
         liNode.className = "term";
-        if (id != null) {
-          liNode.id = id;
-        }
-        else {
-          liNode.id = "term" + newTermIndex;
-        }
+        liNode.id = "term" + newId;
 
         // Create master term element
         var termNode = document.createElement("label");
@@ -199,15 +189,17 @@
         // Create checkbox input element
         var termCheckboxInputNode = document.createElement("input");
         termCheckboxInputNode.className = "term-checkbox";
-        termCheckboxInputNode.id = "term" + newTermIndex + "checkbox";
+        termCheckboxInputNode.id = "term" + newId + "checkbox";
         termCheckboxInputNode.type = "checkbox";
         if (term != null) {
           termCheckboxInputNode.setAttribute("value", term);
+          existingValue = term;
         }
         if (state != null) {
           termCheckboxInputNode.checked = state;
+          existingState = state;
         }
-        termCheckboxInputNode.setAttribute("onchange", "onChangeCheckboxStatus('term" + newTermIndex + "', this.checked, this.value)");
+        termCheckboxInputNode.setAttribute("onchange", "onChangeCheckboxStatus('term" + newId + "', this.checked, this.value)");
         termNode.appendChild(termCheckboxInputNode);
 
         // Create text input container element
@@ -220,7 +212,7 @@
         termTextInputNode.className = "term-text-input";
         termTextInputNode.type = "text";
         termTextInputNode.setAttribute("name", "term-text-input");
-        termTextInputNode.setAttribute("onchange", "onEditTermTextInput('term" + newTermIndex + "', this.value)");
+        termTextInputNode.setAttribute("onchange", "onEditTermTextInput('term" + newId + "', this.value)");
         // Again, used by loading function
         if (term != null) {
           termTextInputNode.value = term;
@@ -238,7 +230,7 @@
         // Create removal button
         var removalButtonNode = document.createElement("button");
         removalButtonNode.className = "removal-button";
-        removalButtonNode.setAttribute("onclick", "removeTermFromList('term" + newTermIndex + "')")
+        removalButtonNode.setAttribute("onclick", "removeTermFromList('term" + newId + "')");
         var removalSpanNode = document.createElement("span");
         removalSpanNode.innerHTML = "&times;";
         removalButtonNode.appendChild(removalSpanNode);
@@ -246,17 +238,28 @@
 
         // Append master to document
         document.getElementById("terms-list").appendChild(liNode);
+
+        // Finalize
+        // If we're constructing a term from save list, add to client terms list with new termid value
+        if (existingValue != null && existingState != null) {
+          var newClientTermsValue = [existingState, existingValue];
+          var formattedId = "term" + newId;
+          clientTermsList[formattedId] = newClientTermsValue;
+        }
         newTermIndex++;
       }
 
+      // Remove term element
       function removeTermFromList(termId) {
         document.getElementById(termId).remove();
         if (clientTermsList.hasOwnProperty(termId)) {
           delete clientTermsList[termId];
+
           saveClientList();
         }
       }
 
+      // Commit current term to list (on edit, we save)
       function onEditTermTextInput(termId, termValue) {
         // Get checkbox state
         var checkbox = document.getElementById(termId + "checkbox");
@@ -272,33 +275,31 @@
         saveClientList();
       }
 
-      function onChangeCheckboxStatus(termId, newState) {
+      function onChangeCheckboxStatus(termId, newState, newValue) {
         var currentValue = clientTermsList[termId];
         currentValue[0] = newState;
+        currentValue[1] = newValue;
 
-        var newValue = currentValue;
-        clientTermsList[termId] = newValue;
+        var changedValue = currentValue;
+        clientTermsList[termId] = changedValue;
 
+        console.log("changed checkbox id " + termId + " to " + newState + " and value " + newValue);
         // Save terms list
         saveClientList();
       }
 
       function saveClientList() {
         console.log("Save terms list request (client list currently contains " + Object.keys(clientTermsList).length + " terms)");
-        newTermIndex = Object.keys(clientTermsList).length + 1;
         google.script.run.onTermsListChanged(clientTermsList);
       }
 
       function createTermsListFromSavedData(termsList) {
-        clientTermsList = termsList;
-        newTermIndex = Object.keys(clientTermsList).length + 1;
-        for (var key in clientTermsList) {
-          var value = clientTermsList[key];
+        for (var key in termsList) {
+          var value = termsList[key];
           var enabled = value[0];
           var term = value[1];
-          addNewTermElement(key, term, enabled);
+          addNewTermElement(term, enabled);
         }
-        console.log("Deserialized terms, proceeding")
       }
 
       function getSavedTermsList() {

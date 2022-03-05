@@ -94,7 +94,7 @@
       <hr style="width: 50%; text-align: center;">
       <br>
       <div class="start-button-container">
-        <button class="start-button">Start</button>
+        <button class="start-button" onclick="onStartButtonClicked()">Start</button>
       </div>
       <br>
       <div class="edit-button-container">
@@ -116,8 +116,7 @@
 
       // Called when we press the start button
       function onStartButtonClicked() {
-        google.script.run.startUnderlining(selectedCheckboxes);
-        google.script.run.highlightVowels();
+        google.script.run.startUnderlining();
       }
 
     </script>

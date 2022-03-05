@@ -10,6 +10,80 @@
         font-family: "Roboto";
       }
 
+      .highlight-vowels-input-container {
+        display: block;
+        position: relative;
+        padding-left: 35px;
+        margin-botton: 15px;
+      }
+
+      .highlight-vowels-input {
+        display: inline-block;
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+        margin: 0;
+      }
+
+      .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 20px;
+        width: 20px;
+        border-radius: 2px;
+        background-color: #eee;
+      }
+
+      .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+      }
+
+      .highlight-vowels-input:checked ~ .checkmark:after {
+        display: block;
+      }
+
+      .highlight-vowels-input-container .checkmark:after {
+        position: absolute;
+        content: "";
+        top: 50%;
+        left: 3px;
+        transform: scaleX(-1) rotate(135deg);
+        height: 10px;
+        width: 5px;
+        border-top: 3px solid #5cb85c;
+        border-right: 3px solid #5cb85c;
+        transform-origin: left top;
+        animation: checkmark 0.8s ease;
+      }
+
+      @keyframes checkmark {
+        0%{
+          height: 0;
+          width: 0;
+          opacity: 1;
+        }
+        20%{
+          height: 0;
+          width: 5px;
+          opacity: 1;
+        }
+        40%{
+          height: 10px;
+         width: 5px;
+         opacity: 1;
+        }
+       100%{
+         height: 10px;
+         width: 5px;
+          opacity: 1;
+        }
+      }
+
       .clear-terms-button {
         background-color: #BA1607;
         border: none;
@@ -29,11 +103,32 @@
       }
     </style>
   </head>
-  <body>
+  <body onload="getHighlightVowelsState()">
+    <div>
+      <label class="highlight-vowels-input-container">
+        <input class="highlight-vowels-input" id="highlight-vowels-input" type="checkbox" onclick="onSaveHighlightVowels(this.checked)">
+        <p>Highlight vowels</p>
+        <span class="checkmark"></span>
+      </label>
+    </div>
+    <br>
     <button class="clear-terms-button" onclick="requestClearTermsList()">Clear terms list</button>
     <p>Phonetifier &#169; Indy Sierra, 2022</p>
   </body>
   <script>
+    function onSaveHighlightVowels(_state) {
+      google.script.run.saveHighlightVowels(_state);
+    }
+
+    function getHighlightVowelsState() {
+      google.script.run.withSuccessHandler(changeHighlighterSettings).getSaveHighlightVowels();
+    }
+
+    function changeHighlighterSettings(_bool) {
+      console.log(_bool);
+      document.getElementById("highlight-vowels-input").checked = _bool;
+    }
+
     function requestClearTermsList() {
       google.script.run.clearTermsList();
       console.log("scriptproperties store cleared");

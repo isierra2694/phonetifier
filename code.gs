@@ -37,8 +37,15 @@ function startUnderlining() {
   var termsList = getSavedTermsList();
   for (const [key, value] of Object.entries(termsList)) {
     // Value is an array [activeState, term], we need value[1] for term
-    underlineTerm(value[1]);
+    if (value[0] == true) {
+      underlineTerm(value[1]);
+    }
   }
+
+  if (getSaveHighlightVowels()) {
+    highlightVowels();
+  }
+
 }
 
 function underlineTerm(term) {
@@ -52,7 +59,11 @@ function underlineTerm(term) {
 
     thisElementText.setUnderline(searchResult.getStartOffset(), searchResult.getEndOffsetInclusive(), true);
 
-    searchResult = bodyElement.findText(term, searchResult);
+    var searchTerm = "(?i)" + term;
+
+    Logger.log(searchTerm);
+
+    searchResult = bodyElement.findText(searchTerm, searchResult);
   }
 }
 
@@ -84,6 +95,8 @@ function onTermsListChanged(termsList) {
     newDictionary[key] = jvalue;
   }
 
+  clearTermsList();
+
   var scriptProperties = PropertiesService.getScriptProperties();
   scriptProperties.setProperties(newDictionary);
   Logger.log("Saved termslist");
@@ -107,4 +120,18 @@ function clearTermsList() {
   var properties = PropertiesService.getScriptProperties();
   properties.deleteAllProperties();
   Logger.log("Cleared property store");
+}
+
+function saveHighlightVowels(_state) {
+  var userProperties = PropertiesService.getUserProperties();
+  var storedBool = JSON.stringify(_state);
+  userProperties.setProperty("highlight", storedBool);
+  getSaveHighlightVowels();
+}
+
+function getSaveHighlightVowels() {
+  var userProperties = PropertiesService.getUserProperties();
+  var storedState = userProperties.getProperty("highlight");
+  newBool = JSON.parse(storedState);
+  return newBool;
 }
